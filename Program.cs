@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using System;
 
 
+// strategy : https://alpaca.markets/learn/mean-reversion-stock-trading-csharp/
+
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
