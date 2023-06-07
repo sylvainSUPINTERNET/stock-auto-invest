@@ -2,6 +2,7 @@ using Alpaca.Markets;
 using Microsoft.Extensions.Logging;
 using Services;
 using System;
+using YahooFinanceApi;
 
 
 // strategy : https://alpaca.markets/learn/mean-reversion-stock-trading-csharp/
@@ -35,6 +36,8 @@ try
         app.Logger.LogInformation("Alpaca API Key found in appsettings.json starting new client ...");
 
         IAlpacaTradingClient? client = null;
+
+        // will be limited in free tier ! 
         IAlpacaDataClient? dataClient = null;
 
         if ( builder.Environment.IsDevelopment() ) 
@@ -70,47 +73,51 @@ try
         IAccount account = await client.GetAccountAsync();
         Console.WriteLine($"Account: {account.TradableCash}");
 
+        string dateString = "2023-06-08";
+        var endDate =  DateTime.Parse(dateString);
 
-        int PERIOD_SHORT = 8;
-        int PERIOD_LONG = 13;
-        string symbol = "NVDA";
+        // For the past 5 days
+        var startDate5 = endDate.AddDays(-7);
+        var historical5 = await Yahoo.GetHistoricalAsync("NVDA", startDate5, endDate, Period.Daily);
+        var realShortPeriod5 = historical5.Count(); // does not contain the weekends etc .. that's the real value for period to use        
+        Console.WriteLine($"Real Short Period 5: {realShortPeriod5}");
 
-        Interval<DateTime> intervalShort = new Interval<DateTime>(DateTime.Today.AddDays(-PERIOD_SHORT), DateTime.Today);
-        Interval<DateTime> intervalLong = new Interval<DateTime>(DateTime.Today.AddDays(-PERIOD_LONG), DateTime.Today);
+        var sma5 = historical5.ToList().Average(x => x.Close);
 
-        IMultiPage<IBar> dataShort = await dataClient.GetHistoricalBarsAsync(new HistoricalBarsRequest(symbol, BarTimeFrame.Day, intervalShort));
+        // For the past 10 days
+        var startDate10 = endDate.AddDays(-15);
+        var historical10 = await Yahoo.GetHistoricalAsync("NVDA", startDate10, endDate, Period.Daily);
+        var realShortPeriod10 = historical10.Count(); // does not contain the weekends etc .. that's the real value for period to use        
+        Console.WriteLine($"Real Short Period 10: {realShortPeriod10}");
 
+        var sma10 = historical10.ToList().Average(x => x.Close);
 
-        Console.WriteLine($"Short : {dataShort.Items.Count()}");
-        
-        dataShort.Items.ToList().ForEach( x => Console.WriteLine($"Short : {x.Key}"));
-
-
-        IMultiPage<IBar> dataLong = await dataClient.GetHistoricalBarsAsync(new HistoricalBarsRequest(symbol, BarTimeFrame.Day, intervalLong));
-
-        
-        // {
-        //     Limit = 14,
-        //     StartDateTimeInclusive = DateTime.Today.AddDays(-14),
-        //     EndDateTimeExclusive = DateTime.Today
-        // }); 
+        // TODO 
+        // until we cross again
+    
+        Console.WriteLine($"Average 5 Days: {sma5}");
+        Console.WriteLine($"Average 10 Days: {sma10}");
 
 
-        // var bars = await client.ListHistoricalBarsAsync(new HistoricalBarsRequest(14, TimeFrame.Day)
-        // {
-        //     Limit = PERIOD,
-        //     StartDateTimeInclusive = DateTime.Today.AddDays(-PERIOD),
-        //     EndDateTimeExclusive = DateTime.Today
-        // });
+        // sensitivity of the strategy ( lower = more signals, higher = less signals)
+        double thresholdDiff = 5.0;
 
-        
+        // Calculate the difference between SMA5 and SMA10
+        double diff = (double)(sma5 - sma10);
 
-        // Idea 
-        // get day bars
-        // average of them price
-        // get current price 
-        // do the average mean 
-        // based on threshold buy or sell ( in our case send a notification to telegram bot )
+        // Buy signal: SMA5 crosses above SMA10
+        if(diff > thresholdDiff)
+        {
+            Console.WriteLine("Buy signal: SMA5 crossed above SMA10.");
+            // Perform some action (like buying the stock)
+        }
+
+        // Sell signal: SMA5 crosses below SMA10
+        else if(diff < -thresholdDiff)
+        {
+            Console.WriteLine("Sell signal: SMA5 crossed below SMA10.");
+            // Perform some action (like selling the stock)
+        }
 
         app.MapGet("/", () => "Hello World!");
 
