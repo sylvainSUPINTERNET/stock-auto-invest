@@ -50,11 +50,13 @@ public class TradeBackgroundService : BackgroundService
                 _logger.LogWarning("{Timestamp:yyyy-MM-dd HH:mm:ss} - {Message}", DateTime.Now, $"Market is now {(clock.IsOpen ? "open" : "closed")}.");
             }
 
-            var order = await _computeSMA.ComputeSMASignal(_symbol);
+            var order = await _computeSMA.ComputeSMASignal(_symbol, _client, 5.0);
             if ( order == null ) 
             {
                 _logger.LogError("{Timestamp:yyyy-MM-dd HH:mm:ss} - {Message}", DateTime.Now, $" Error while computing SMA signal. Cannot defined order type.");
+
             } else {
+                // TODO : notify telegram bot !
                 _logger.LogInformation("{Timestamp:yyyy-MM-dd HH:mm:ss} - {Message}", DateTime.Now, $" >>>> {order}");
             }
 
