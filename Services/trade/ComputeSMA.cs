@@ -27,26 +27,12 @@ class ComputeSMA : IComputeSMA
         return account;
     }
 
+
     async Task<OrderType?> IComputeSMA.ComputeSMASignal(string symbol, IAlpacaTradingClient client, double threshold) 
     {
 
- 
-
-       IAccount account = await AccountDetails(client);
-
-        _logger.LogInformation("{Timestamp:yyyy-MM-dd HH:mm:ss} - {Message}", DateTime.Now, $"Cash for trading : {account.TradableCash}$");
-        // TODO : steps :
-        // Check amount of cash available -> if no cash ping telegram bot
-        // If cash available take X percent of the cash available
-        // Check if we have already a position on this symbol
-        // If not create ( sell or buy ) 
-        // If yes, close it ? notify bot
-        // Bonus : If market soon to be closed, close the position
-
-
         try {
 
-            IAccount account = await AccountDetails(client);
 
             _logger.LogInformation("{Timestamp:yyyy-MM-dd HH:mm:ss} - {Message}", DateTime.Now, $"Using threshold: {threshold} for SMA5 and SMA10");
 
