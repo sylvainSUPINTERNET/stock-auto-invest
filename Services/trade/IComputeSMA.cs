@@ -6,6 +6,6 @@ public interface IComputeSMA
 {
     public Task<IAccount> AccountDetails(IAlpacaTradingClient client);
 
-    public Task<OrderType?> ComputeSMASignal( String symbol, IAlpacaTradingClient client, double threshold = 5.0);
+    public Task<OrderCustomSide?> ComputeSMASignal( String symbol, IAlpacaTradingClient client, double threshold = 5.0);
     
 }

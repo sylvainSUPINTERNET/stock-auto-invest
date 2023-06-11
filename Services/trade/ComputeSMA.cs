@@ -3,7 +3,7 @@ using YahooFinanceApi;
 
 namespace Services.Trade;
 
-public enum OrderType
+public enum OrderCustomSide
 {
     Buy,
     Sell
@@ -28,7 +28,7 @@ class ComputeSMA : IComputeSMA
     }
 
 
-    async Task<OrderType?> IComputeSMA.ComputeSMASignal(string symbol, IAlpacaTradingClient client, double threshold) 
+    async Task<OrderCustomSide?> IComputeSMA.ComputeSMASignal(string symbol, IAlpacaTradingClient client, double threshold) 
     {
 
         try {
@@ -68,7 +68,7 @@ class ComputeSMA : IComputeSMA
             {
                 _logger.LogInformation("{Timestamp:yyyy-MM-dd HH:mm:ss} - {Message}", DateTime.Now, "Buy signal: SMA5 crossed above SMA10.");
                 // Perform some action (like buying the stock)
-                return OrderType.Buy;
+                return OrderCustomSide.Buy;
             }
 
             // Sell signal: SMA5 crosses below SMA10
@@ -76,7 +76,7 @@ class ComputeSMA : IComputeSMA
             {
                 _logger.LogInformation("{Timestamp:yyyy-MM-dd HH:mm:ss} - {Message}", DateTime.Now, "Sell signal: SMA5 crossed below SMA10.");
                 // Perform some action (like selling the stock)
-                return OrderType.Sell;
+                return OrderCustomSide.Sell;
             }
 
 
